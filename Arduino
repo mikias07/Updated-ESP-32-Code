@@ -1,6 +1,6 @@
 //
 //Parker Butler
-​//Mikias Aregay​
+//Mikias Aregay
 
 const int DOT[6] = {33, 32, 13, 12, 14, 27}; // Dot1..Dot6
 const int SPACE_PIN = 26; // Space (INPUT_PULLUP)
@@ -51,8 +51,19 @@ void waitReleaseAll(){
 	delay(AFTER_MS);
 }
 
-char mapLetter(uint8_t m){ for (auto &p : LETTERS) if (p.mask == m) return p.ch; return '\0'; }
-char mapSymbol(uint8_t m){ for (auto &s : SYMBOLS) if (s.mask == m) return s.out; return '\0'; }
+char mapLetter(uint8_t m){
+  for (int i = 0; i < sizeof(LETTERS)/sizeof(LETTERS[0]); i++){
+    if (LETTERS[i].mask == m) return LETTERS[i].ch;
+  }
+  return '\0';
+}
+
+char mapSymbol(uint8_t m){
+  for (int i = 0; i < sizeof(SYMBOLS)/sizeof(SYMBOLS[0]); i++){
+    if (SYMBOLS[i].mask == m) return SYMBOLS[i].out;
+  }
+  return '\0';
+}
 
 char aToJ_toDigit(char c){
 	switch(c){
@@ -69,7 +80,7 @@ void setup(){
 	pinMode(SPACE_PIN, INPUT_PULLUP);
 
 	Serial.println("✅ Braille Typewriter READY!");
-	Serial.println("Dots = {33,32,13,12,14,27} | Space = 4 | Backspace = dots 2-5-6");
+	Serial.println("Dots = {33,32,13,12,14,27} | Space = 26 | Backspace = dots 2-5-6");
 	Serial.println("3456 = Number Mode | Dot2 in Number Mode = '.'");
 }
 
@@ -98,4 +109,37 @@ void loop(){
 		}
 		delay(2);
 	}
+// Decode chord
+if (mask == NUMBER_SIGN){
+  numericMode = true;
+  waitReleaseAll();
+  return;
+}
+
+if (mask == BS_MASK){
+  Serial.write('\b');
+  waitReleaseAll();
+  return;
+}
+
+char out = '\0';
+
+if (numericMode){
+  char letter = mapLetter(mask);
+  out = aToJ_toDigit(letter);
+}
+else{
+  out = mapLetter(mask);
+
+  if (out == '\0') {
+    out = mapSymbol(mask);
+  }
+}
+
+if (out != '\0'){
+  Serial.write(out);
+}
+
+waitReleaseAll();
+
 }
