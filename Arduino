@@ -10,6 +10,7 @@ const uint16_t DEBOUNCE_MS = 20;
 const uint16_t AFTER_MS = 60;
 
 bool numericMode = false;
+bool mathMode = false;
 
 #define B(d) (1u << ((d)-1))
 
@@ -109,6 +110,20 @@ void loop(){
 		}
 		delay(2);
 	}
+	// Toggle Math Mode (dots 1-3-5-6)
+	if (mask == (B(1)|B(3)|B(5)|B(6))){
+  		mathMode = !mathMode;
+  		numericMode = false;
+
+  		if (mathMode){
+    		Serial.println("\n[MATH MODE]");
+  		} else {
+    		Serial.println("\n[TEXT MODE]");
+  		}
+
+  		waitReleaseAll();
+  		return;
+	}
 // Decode chord
 if (mask == NUMBER_SIGN){
   numericMode = true;
@@ -122,6 +137,37 @@ if (mask == BS_MASK){
   return;
 }
 
+// ---------- MATH MODE ----------
+if (mathMode){
+
+  // Numbers 
+  char letter = mapLetter(mask);
+  char digit = aToJ_toDigit(letter);
+
+  if (digit != '\0'){
+    Serial.write(digit);
+    waitReleaseAll();
+    return;
+  }
+
+  // Letters 
+  if (letter != '\0'){
+    Serial.write(letter);
+    waitReleaseAll();
+    return;
+  }
+
+  // Symbols (+ - etc)
+  char sym = mapSymbol(mask);
+  if (sym != '\0'){
+    Serial.write(sym);
+    waitReleaseAll();
+    return;
+  }
+
+}
+
+// ---------- TEXT MODE
 char out = '\0';
 
 if (numericMode){
@@ -134,6 +180,10 @@ else{
   if (out == '\0') {
     out = mapSymbol(mask);
   }
+}
+
+if (out != '\0'){
+  Serial.write(out);
 }
 
 if (out != '\0'){
