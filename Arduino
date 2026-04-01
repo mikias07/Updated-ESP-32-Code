@@ -137,7 +137,7 @@ if (mask == BS_MASK){
   return;
 }
 
-// ---------- MATH MODE ----------
+//  MATH MODE 
 if (mathMode){
 
   // Numbers 
@@ -167,7 +167,7 @@ if (mathMode){
 
 }
 
-// ---------- TEXT MODE
+//  TEXT MODE
 char out = '\0';
 
 if (numericMode){
