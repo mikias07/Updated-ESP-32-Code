@@ -80,7 +80,7 @@ void setup(){
 	for (int i=0;i<6;i++) pinMode(DOT[i], INPUT_PULLUP);
 	pinMode(SPACE_PIN, INPUT_PULLUP);
 
-	Serial.println("✅ Braille Typewriter READY!");
+	Serial.println("Braille Typewriter READY!");
 	Serial.println("Dots = {33,32,13,12,14,27} | Space = 26 | Backspace = dots 2-5-6");
 	Serial.println("3456 = Number Mode | Dot2 in Number Mode = '.'");
 }
