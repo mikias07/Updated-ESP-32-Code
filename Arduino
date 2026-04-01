@@ -90,7 +90,13 @@ void loop(){
 	if (isPressed(SPACE_PIN) && !anyDotPressed()){
 		delay(DEBOUNCE_MS);
 		if (isPressed(SPACE_PIN) && !anyDotPressed()){
-			Serial.write(' ');
+
+			if (mathmode){
+				Serial.print("} "); //closes with {}
+			} else {
+				Serial.write(' ');
+			}
+
 			numericMode = false;
 			waitReleaseAll();
 			return;
@@ -124,72 +130,107 @@ void loop(){
   		waitReleaseAll();
   		return;
 	}
-// Decode chord
-if (mask == NUMBER_SIGN){
-  numericMode = true;
-  waitReleaseAll();
-  return;
-}
 
-if (mask == BS_MASK){
-  Serial.write('\b');
-  waitReleaseAll();
-  return;
-}
+	// Decode chord
+	if (mask == NUMBER_SIGN){
+  		numericMode = true;
+  		waitReleaseAll();
+  		return;
+	}
 
-//  MATH MODE 
-if (mathMode){
+	if (mask == BS_MASK){
+  		Serial.write('\b');
+ 	 	waitReleaseAll();
+  		return;
+	}
 
-  // Numbers 
-  char letter = mapLetter(mask);
-  char digit = aToJ_toDigit(letter);
+	if (!mathMode && mask == NUMBER_SIGN){
+		numericMode = true;
+		waitReleaseAll();
+		return;
+	}
 
-  if (digit != '\0'){
-    Serial.write(digit);
-    waitReleaseAll();
-    return;
-  }
+	//  MATH MODE 
+	if (mathMode){
 
-  // Letters 
-  if (letter != '\0'){
-    Serial.write(letter);
-    waitReleaseAll();
-    return;
-  }
+		// SUPER SCRIPT
+		if (mask == (B(1)|B(6))){
+			Serial.print("^{");
+			waitReleaseAll();
+			return;
+		}
 
-  // Symbols (+ - etc)
-  char sym = mapSymbol(mask);
-  if (sym != '\0'){
-    Serial.write(sym);
-    waitReleaseAll();
-    return;
-  }
+		// Fraction start
+		if (mask == (B(1)|B(2)|B(3))){
+			Serial.print("\\frac{}");
+			waitReleaseAll();
+			return;
+		}
 
-}
+		// Fraction Divider
+    	if (mask == (B(3)|B(4))){
+      		Serial.print("}{");
+      		waitReleaseAll();
+      		return;
+    	}
 
-//  TEXT MODE
-char out = '\0';
+    	// Fraction End
+    	if (mask == (B(4)|B(5))){
+      		Serial.print("}");
+      		waitReleaseAll();
+      	return;
+    	}
 
-if (numericMode){
-  char letter = mapLetter(mask);
-  out = aToJ_toDigit(letter);
-}
-else{
-  out = mapLetter(mask);
+  		// Numbers 
+  		char letter = mapLetter(mask);
+  		char digit = aToJ_toDigit(letter);
 
-  if (out == '\0') {
-    out = mapSymbol(mask);
-  }
-}
+  		if (digit != '\0'){
+    		Serial.write(digit);
+    		waitReleaseAll();
+    		return;
+  		}
 
-if (out != '\0'){
-  Serial.write(out);
-}
+  		// Letters 
+  		if (letter != '\0'){
+    		Serial.write(letter);
+    		waitReleaseAll();
+    		return;
+  		}
 
-if (out != '\0'){
-  Serial.write(out);
-}
+  		// Symbols (+ - etc)
+  		char sym = mapSymbol(mask);
+  		if (sym != '\0'){
+    		Serial.write(sym);
+    		waitReleaseAll();
+    		return;
+  		}
 
-waitReleaseAll();
+	}
+
+	//  TEXT MODE
+	char out = '\0';
+
+	if (numericMode){
+  		char letter = mapLetter(mask);
+  		out = aToJ_toDigit(letter);
+	}
+	else{
+  		out = mapLetter(mask);
+
+  		if (out == '\0') {
+    		out = mapSymbol(mask);
+  		}
+	}
+
+	if (out != '\0'){
+ 		Serial.write(out);
+	}
+
+	if (out != '\0'){
+  		Serial.write(out);
+	}
+
+	waitReleaseAll();
 
 }
