@@ -227,10 +227,6 @@ void loop(){
  		Serial.write(out);
 	}
 
-	if (out != '\0'){
-  		Serial.write(out);
-	}
-
 	waitReleaseAll();
 
 }
