@@ -11,6 +11,7 @@ const uint16_t AFTER_MS = 60;
 
 bool numericMode = false;
 bool mathMode = false;
+int openBraces = 0;
 
 #define B(d) (1u << ((d)-1))
 
@@ -91,8 +92,11 @@ void loop(){
 		delay(DEBOUNCE_MS);
 		if (isPressed(SPACE_PIN) && !anyDotPressed()){
 
-			if (mathmode){
-				Serial.print("} "); //closes with {}
+			if (mathMode){
+				if (openBraces > 0){
+					Serial.print("} "); //closes with {}
+					openBraces--;
+				}
 			} else {
 				Serial.write(' ');
 			}
@@ -131,12 +135,6 @@ void loop(){
   		return;
 	}
 
-	// Decode chord
-	if (mask == NUMBER_SIGN){
-  		numericMode = true;
-  		waitReleaseAll();
-  		return;
-	}
 
 	if (mask == BS_MASK){
   		Serial.write('\b');
@@ -145,9 +143,9 @@ void loop(){
 	}
 
 	if (!mathMode && mask == NUMBER_SIGN){
-		numericMode = true;
-		waitReleaseAll();
-		return;
+  		numericMode = true;
+  		waitReleaseAll();
+  		return;
 	}
 
 	//  MATH MODE 
@@ -156,26 +154,27 @@ void loop(){
 		// SUPER SCRIPT
 		if (mask == (B(1)|B(6))){
 			Serial.print("^{");
+			openBraces++;
 			waitReleaseAll();
 			return;
 		}
 
 		// Fraction start
 		if (mask == (B(1)|B(2)|B(3))){
-			Serial.print("\\frac{}");
+			Serial.print("\\frac{");
 			waitReleaseAll();
 			return;
 		}
 
 		// Fraction Divider
-    	if (mask == (B(3)|B(4))){
+    	if (mask == (B(3)|B(4)) && openBraces > 0){
       		Serial.print("}{");
       		waitReleaseAll();
       		return;
     	}
 
     	// Fraction End
-    	if (mask == (B(4)|B(5))){
+    	if (mask == (B(4)|B(5)) && openBraces > 0){
       		Serial.print("}");
       		waitReleaseAll();
       	return;
